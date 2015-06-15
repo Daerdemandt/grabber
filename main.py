@@ -3,7 +3,7 @@
 from os import listdir
 from importlib import import_module
 
-from misc import print_bets
+from misc import print_bets, ParseError, print_bets_simple
 
 def get_all_data():
 	stoplist = set(['main.py', 'misc.py', '__pycache__'])
@@ -16,11 +16,24 @@ def get_all_data():
 		result[target] = get_data()
 	return result
 
+def static_cast(data):
+	result = {}
+	for source in data:
+		try:
+			result[source] = list(data[source])
+		except ParseError:
+			print("Error: seemingly, page structure at", source, "has changed")
+	return result
+
 def main():
-	all_data = get_all_data()
+	# We'll make sure all data is pulled successfully before printing it
+	all_data = static_cast(get_all_data())
+#	all_data = get_all_data()
 	for source in all_data:
 		print(source, ':')
 		print_bets(all_data[source])
+		# In case you need to export
+#		print_bets_simple(all_data[source])
 		
 
 if __name__ == "__main__":

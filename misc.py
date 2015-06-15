@@ -49,7 +49,6 @@ def get_filename(url):
 	return tmpdir + '/' + domain_name + '.' + addr_digest
 
 def print_bet_pretty(bet_data):
-#	print('; '.join(field + ' : ' + str(bet_data[field]) for field in fields_we_need))
 	dt_string = bet_data['datetime'].strftime("%B %d, %Y %H:%M")
 	name_length = 20
 	t1_string = bet_data['team1'].rjust(name_length)
@@ -58,10 +57,14 @@ def print_bet_pretty(bet_data):
 	p1_string = str(bet_data['team1_wins']).ljust(odds_length)
 	p2_string = str(bet_data['team2_wins']).ljust(odds_length)
 	print(dt_string, t1_string, 'vs', t2_string, p1_string, p2_string)
-#	print(str(dt))
-#	print(dt)
-
+	
+def print_bet_simple(bet_data):
+	print("'" + "', '".join(str(bet_data[field]) for field in fields_we_need) + "'")
 
 def print_bets(bets):
 	for bet in bets:
 		print_bet_pretty(bet)
+
+def print_bets_simple(bets):
+	for bet in bets:
+		print_bet_simple(bet)
