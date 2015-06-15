@@ -2,6 +2,7 @@ fields_we_need = ['datetime', 'team1', 'team2', 'team1_wins', 'team2_wins']
 
 from datetime import timedelta, tzinfo
 import urllib.request, os, os.path
+from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup, element
 from hashlib import md5
 
@@ -35,8 +36,7 @@ def remove_file(filename):
 
 def soup_find_only(where, *args, **kwargs):
 	results = where.find_all(*args, **kwargs)
-	if len(results) != 1:
-		raise ParseError('Error: page at ' + URL + "doesn't comply to assumed format")
+	parse_assert(len(results) == 1)
 	return results[0]
 
 def get_filename(url):
@@ -58,6 +58,16 @@ def print_bet_pretty(bet_data):
 	p2_string = str(bet_data['team2_wins']).ljust(odds_length)
 	print(dt_string, t1_string, 'vs', t2_string, p1_string, p2_string)
 	
+URL = None
+
+def set_url(url):
+	global URL
+	URL = url
+
+def parse_assert(check=False):
+	if not check:
+		raise ParseError('Error: page at ' + URL + "doesn't comply to assumed format")
+	
 def print_bet_simple(bet_data):
 	print("'" + "', '".join(str(bet_data[field]) for field in fields_we_need) + "'")
 
@@ -68,3 +78,9 @@ def print_bets(bets):
 def print_bets_simple(bets):
 	for bet in bets:
 		print_bet_simple(bet)
+
+#TODO: add catching network errors
+#TODO: use this in other files too
+def fetch(URL=URL):
+	source = urlopen(Request(URL, headers={'User-Agent': 'Mozilla'}))
+	return source.readall().decode('utf-8')

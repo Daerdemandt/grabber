@@ -6,39 +6,25 @@
 # Several assumptions about page format are made. If any of them is violated, ParseError is raised.
 
 from datetime import datetime
-from urllib.request import urlopen, Request
 import json
-
 
 from misc import *
 
 URL = 'http://egamingbets.com/ajax.php?key=modules_tables_update_UpdateTableBets&act=UpdateTableBets&ajax=update&fg=1&ind=tables&st=0&type=modules&ut=0'
 
-#TODO: rewrite ParseError so it could be raised with the same message with only URL provided
-
-# Move this to misc.py
-#TODO: add catching network errors
-#TODO: use this in other files too
-def fetch(URL):
-	source = urlopen(Request(URL, headers={'User-Agent': 'Mozilla'}))
-	return source.readall().decode('utf-8')
-
-# ['datetime', 'team1', 'team2', 'team1_wins', 'team2_wins']
+set_url(URL)
 
 def parse_bet(bet_jsoned):
 	result = {}
 	fields_we_need_here = ['gamer_1', 'gamer_2', 'coef_1', 'coef_2', 'date', 'date_t']
-	if not all(field in bet_jsoned for field in fields_we_need_here):
-		raise ParseError('Error: page at ' + URL + "doesn't comply to assumed format")
-	if not 'nick' in bet_jsoned['gamer_1'] or not 'nick' in bet_jsoned['gamer_2']:
-		raise ParseError('Error: page at ' + URL + "doesn't comply to assumed format")
+	parse_assert(all(field in bet_jsoned for field in fields_we_need_here))
+	parse_assert('nick' in bet_jsoned['gamer_1'] and 'nick' in bet_jsoned['gamer_2'])
 	result['team1'] = bet_jsoned['gamer_1']['nick'].strip()
 	result['team2'] = bet_jsoned['gamer_2']['nick'].strip()
 	result['team1_wins'] = float(bet_jsoned['coef_1'])
 	result['team2_wins'] = float(bet_jsoned['coef_2'])
 	# I don't know the difference between these. Let's assume they're equal and pick first one
-	if bet_jsoned['date'] != bet_jsoned['date_t']:
-		raise ParseError('Error: page at ' + URL + "doesn't comply to assumed format")
+	parse_assert(bet_jsoned['date'] == bet_jsoned['date_t'])
 	result['datetime'] = datetime.fromtimestamp(int(bet_jsoned['date']))
 	return result
 
