@@ -39,21 +39,22 @@ def extract_data(filename):
 		# Now, lets go for time and date. We use UTC, and so do they, apparently
 		# I don't know why they've called it this way.
 		datetime_string = str(soup_find_only(bet, 'td', class_='score'))
-		# TODO: try-catch this for ValueError, transform it to ParseError
-		# We'll have to do it the ugly way. Use '>' and '<' as separators.
-		datetime_string = datetime_string.replace('>', '<').split('<')[2]
-		date, time = datetime_string.split(' | ')
-		day, month = date.split('.')
-		day, month = int(day), int(month)
-		year = datetime.now().year
-		# Bet info is provided a bit in advance.
-		# We shall work properly on a new year.
-		if 12 == datetime.now().month and 1 == month:
-			year += 1
-		hour, minute = time.split(':')
-		hour, minute = int(hour), int(minute)
-		bet_data['datetime'] = datetime(year, month, day, hour, minute, tzinfo=UTC())
-		
+			# We'll have to do it the ugly way. Use '>' and '<' as separators.
+		try:
+			datetime_string = datetime_string.replace('>', '<').split('<')[2]
+			date, time = datetime_string.split(' | ')
+			day, month = date.split('.')
+			day, month = int(day), int(month)
+			year = datetime.now().year
+			# Bet info is provided a bit in advance.
+			# We shall work properly on a new year.
+			if 12 == datetime.now().month and 1 == month:
+				year += 1
+			hour, minute = time.split(':')
+			hour, minute = int(hour), int(minute)
+			bet_data['datetime'] = datetime(year, month, day, hour, minute, tzinfo=UTC())
+		except ValueError:
+			raise ParseError('Error: page at ' + URL + "doesn't comply to assumed format")	
 		# Finally, let's get odds we need
 		def get_odds(betname):
 			return float(soup_find_only(bet, 'div', {'data-betname':betname}).string.strip())
