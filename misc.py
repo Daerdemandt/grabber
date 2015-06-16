@@ -112,7 +112,7 @@ class GenericParser(object):
 
 class BetParser(GenericParser):	
 	def set_fields_we_need(self):
-		self.fields_we_need = ['datetime', 'team1', 'team2', 'team1_wins', 'team2_wins']
+		self.fields_we_need = ['source', 'game_id', 'datetime', 'team1', 'team2', 'team1_wins', 'team2_wins']
 	
 	def print_result_pretty(self, bet_data):
 		dt_string = bet_data['datetime'].strftime("%B %d, %Y %H:%M")
