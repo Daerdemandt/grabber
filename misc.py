@@ -48,7 +48,7 @@ class GenericParser(object):
 		self.resource_name = resource_name
 		self.resource_type = resource_type
 		
-		resource_types = ['html', 'json', None]
+		resource_types = ['html', 'json', 'raw', None]
 		if hasattr(self, 'valid_resource_types'):
 			self.valid_resource_types |= set(resource_types)
 		else:
@@ -62,8 +62,10 @@ class GenericParser(object):
 			self.resource = BeautifulSoup(resource_raw)
 		elif self.resource_type == 'json':
 			self.resource = json.loads(resource_raw)
+		elif self.resource_type == 'raw':
+			self.resource = resource_raw
 		
-		self.set_fields_we_need()
+		self.fields_we_need = fields_we_need
 		
 		self.results = self.get_data()
 	
@@ -78,7 +80,7 @@ class GenericParser(object):
 			raise ParseError('Error: page at ' + URL + " doesn't comply to assumed format")
 
 	def do_static_cast(self):
-		self.result = tuple(self.result)
+		self.results = tuple(self.results)
 
 	@abstractmethod
 	def print_result_pretty(self, result, output_file):
@@ -136,12 +138,14 @@ class BetParser(GenericParser):
 		GenericParser.__init__(self, url, resource_name, resource_type, fields_we_need)
 
 	def print_result_pretty(self, bet_data):
-		dt_string = bet_data['datetime'].strftime("%B %d %H:%M")
 		name_length = 20
+		odds_length = 5
+		def pretty_odds(odds):
+			return '{0:*^{2}.{1}f}'.format(odds, 2 if odds >= 10 else 3, odds_length)
+		dt_string = bet_data['datetime'].strftime("%B %d %H:%M")
 		t1_string = bet_data['team1'].rjust(name_length)
 		t2_string = bet_data['team2'].ljust(name_length)
-		odds_length = 5
-		p1_string = str(bet_data['team1_wins']).ljust(odds_length)
-		p2_string = str(bet_data['team2_wins']).ljust(odds_length)
+		p1_string = pretty_odds(bet_data['team1_wins'])
+		p2_string = pretty_odds(bet_data['team2_wins'])
 		print(dt_string, t1_string, 'vs', t2_string, p1_string, p2_string)
 
