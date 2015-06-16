@@ -95,13 +95,28 @@ class GenericParser(object):
 		stdout_save = sys.stdout
 		sys.stdout = csvfile
 		writer = csv.writer(csvfile, dialect='unix')
-		for res in self.results:
-			assert issubclass(res.__class__, (list, tuple, dict))
-			if issubclass(res.__class__, dict):
-				writer.writerow(tuple(res[field] for field in self.fields_we_need))
-			else:
-				writer.writerow(res)
+		writer.writerows(self.export())
 		sys.stdout = stdout_save
+	
+	def export(self, fields=None):
+		fields_were_requested = bool(fields)
+		if not fields:
+			fields = self.fields_we_need
+		structured = 'unknown'
+		# This is ugly, but I can't change local variable in nested scope
+		def export_fields(record, flagreference):
+			assert issubclass(record.__class__, (list, tuple, dict))
+			if issubclass(record.__class__, dict):
+				assert structured
+				if 'unknown' == structured:
+					flagreference[0] = True
+				return tuple(record[field] for field in self.fields_we_need)
+			else:
+				assert True != structured
+				if 'unknown' == structured:
+					flagreference[0] = False			
+				return tuple(record)
+		return tuple(export_fields(item, [structured]) for item in self.results)
 
 #TODO: add catching network errors
 	def fetch(self, url=None):
