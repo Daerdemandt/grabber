@@ -9,21 +9,20 @@ from datetime import datetime
 
 from misc import *
 
-URL='https://1-x-bet.com/line/KiberSport/'
+set_url('https://1-x-bet.com/line/KiberSport/')
+
+URL3.set('https://1-x-bet.com/line/KiberSport/')
+print(URL3.url)
 
 def get_data():
-	filename = get_filename(URL)
-	get_file(filename, URL)
-	yield from extract_data(filename)
-	remove_file(filename)
+	yield from extract_data(get_parsed_html())
 
-def extract_data(filename):
-	whole_soup = read_soup(filename)
+def extract_data(whole_soup):
+#	whole_soup = read_soup(filename)
 	body = whole_soup.html.body
 	bets_table = list(soup_find_only(body, class_="hot_live_bet"))
 	# Last etnry is just a string, is it?
-	if not isinstance(bets_table[-1], element.NavigableString):
-		raise ParseError('Error: page at ' + URL + "doesn't comply to assumed format")
+	parse_assert(isinstance(bets_table[-1], element.NavigableString))
 	# Last entry is just a string so we don't parse it
 	for bet in bets_table[:-1]:
 		bet_data = {}
@@ -32,8 +31,7 @@ def extract_data(filename):
 		game_name = soup_find_only(bet, class_='gname hotGameTitle')
 		game_name = game_name.string.strip()
 		# We assume that teams' names don't contain '—'
-		if 1 != game_name.count('—'):
-			raise ParseError('Error: page at ' + URL + "doesn't comply to assumed format")
+		parse_assert(1 == game_name.count('—'))
 		bet_data['team1'], bet_data['team2'] = game_name.split(' — ')
 		
 		# Now, lets go for time and date. We use UTC, and so do they, apparently
@@ -54,7 +52,7 @@ def extract_data(filename):
 			hour, minute = int(hour), int(minute)
 			bet_data['datetime'] = datetime(year, month, day, hour, minute, tzinfo=UTC())
 		except ValueError:
-			raise ParseError('Error: page at ' + URL + "doesn't comply to assumed format")	
+			parse_assert()	
 		# Finally, let's get odds we need
 		def get_odds(betname):
 			return float(soup_find_only(bet, 'div', {'data-betname':betname}).string.strip())

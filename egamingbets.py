@@ -6,7 +6,6 @@
 # Several assumptions about page format are made. If any of them is violated, ParseError is raised.
 
 from datetime import datetime
-import json
 
 from misc import *
 
@@ -39,7 +38,7 @@ def parse_bet_list(bet_list_jsoned):
 				yield parse_bet(bet)		
 
 def get_data():
-	whole_thing = json.loads(fetch(URL))
+	whole_thing = get_parsed_json()
 	yield from parse_bet_list(whole_thing['bets'])
 
 def main():
