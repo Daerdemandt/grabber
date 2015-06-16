@@ -75,7 +75,7 @@ class GenericParser(object):
 			raise ParseError('Error: page at ' + URL + " doesn't comply to assumed format")
 
 	def do_static_cast(self):
-		self.result = list(self.result)
+		self.result = tuple(self.result)
 
 	@abstractmethod
 	def print_result_pretty(self, result, output_file):
@@ -115,7 +115,7 @@ class BetParser(GenericParser):
 		self.fields_we_need = ['source', 'game_id', 'datetime', 'team1', 'team2', 'team1_wins', 'team2_wins']
 	
 	def print_result_pretty(self, bet_data):
-		dt_string = bet_data['datetime'].strftime("%B %d, %Y %H:%M")
+		dt_string = bet_data['datetime'].strftime("%B %d %H:%M")
 		name_length = 20
 		t1_string = bet_data['team1'].rjust(name_length)
 		t2_string = bet_data['team2'].ljust(name_length)
