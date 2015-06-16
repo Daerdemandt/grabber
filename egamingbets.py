@@ -9,12 +9,9 @@ from datetime import datetime
 from misc import BetParser
 
 class Parser(BetParser):
-	def set_url(self):
-		self.url = 'http://egamingbets.com/ajax.php?key=modules_tables_update_UpdateTableBets&act=UpdateTableBets&ajax=update&fg=1&ind=tables&st=0&type=modules&ut=0'
-	def set_resource_name(self):
-		self.resource_name = 'egamingbets'
-	def set_resource_type(self):
-		self.resource_type = 'json'
+	def __init__(self):
+		url = 'http://egamingbets.com/ajax.php?key=modules_tables_update_UpdateTableBets&act=UpdateTableBets&ajax=update&fg=1&ind=tables&st=0&type=modules&ut=0'
+		BetParser.__init__(self, url, 'json')
 
 	def get_data(self):
 		yield from self.parse_bet_list(self.resource['bets'])

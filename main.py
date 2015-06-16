@@ -2,18 +2,19 @@
 # Calls other scripts that get the data.
 from os import listdir
 from importlib import import_module
+from misc import filename_to_parsername
 
 def read_parsers():
 	parsers = {}
 	stoplist = set(['main.py', 'misc.py', '__pycache__'])
-	targets = set(f for f in listdir() if f[0] != '.') - stoplist
-	targets = [f.replace('.py', '') for f in targets]
+	filenames = set(f for f in listdir() if f[0] != '.') - stoplist
+	parsernames = [filename_to_parsername(f) for f in filenames]
 	result = {}
-	for target in targets:
-		module = import_module(target)
+	for name in parsernames:
+		module = import_module(name)
 		Parser = getattr(module, 'Parser')
 		parser = Parser()
-		parsers[target] = parser
+		parsers[name] = parser
 	return parsers
 
 def main():

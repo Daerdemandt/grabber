@@ -10,12 +10,8 @@ import bs4
 from misc import BetParser, UTC
 
 class Parser(BetParser):
-	def set_url(self):
-		self.url = 'https://1-x-bet.com/line/KiberSport/'
-	def set_resource_name(self):
-		self.resource_name = '1xbet'
-	def set_resource_type(self):
-		self.resource_type = 'html'
+	def __init__(self):
+		BetParser.__init__(self, 'https://1-x-bet.com/line/KiberSport/', 'html')
 
 	def get_data(self):
 		body = self.resource.html.body

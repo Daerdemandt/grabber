@@ -1,9 +1,15 @@
-from datetime import timedelta, tzinfo
-from urllib.request import urlopen, Request
-from bs4 import BeautifulSoup, element
-import json
-import csv
-import sys
+from datetime import timedelta, tzinfo # create UTC timezone
+from urllib.request import urlopen, Request # fetching data
+from bs4 import BeautifulSoup, element # parsing html
+import json # parsing json
+import csv # printing in csv
+import sys # redirecting output
+from abc import ABCMeta, abstractmethod # GenericParser is an abstract class
+from inspect import getfile # to get instance's filename
+from os import path # to strip filename of unneeded stuff
+
+def filename_to_parsername(filename):
+	return path.basename(filename).replace('.py', '')
 
 class UTC(tzinfo):
 	"""UTC"""
@@ -14,11 +20,8 @@ class UTC(tzinfo):
 	def dst(self, dt):
 		return timedelta(0)
 		
-
 class ParseError(Exception):
 	pass
-
-from abc import ABCMeta, abstractmethod
 
 class GenericParser(object):
 	__metaclass__ = ABCMeta
@@ -39,11 +42,11 @@ class GenericParser(object):
 	def set_fields_we_need(self):
 		pass
 	
-	def __init__(self):
-		self.set_url()
+	def __init__(self, url, resource_name, resource_type, fields_we_need):
+		self.url = url
 
-		self.set_resource_name()
-		self.set_resource_type()
+		self.resource_name = resource_name
+		self.resource_type = resource_type
 		
 		resource_types = ['html', 'json', None]
 		if hasattr(self, 'valid_resource_types'):
@@ -125,10 +128,13 @@ class GenericParser(object):
 		source = urlopen(Request(url, headers={'User-Agent': 'Mozilla'}))
 		return source.readall().decode('utf-8')
 
-class BetParser(GenericParser):	
-	def set_fields_we_need(self):
-		self.fields_we_need = ['source', 'game_id', 'datetime', 'team1', 'team2', 'team1_wins', 'team2_wins']
-	
+class BetParser(GenericParser):
+	def __init__(self, url, resource_type):
+		fields_we_need = ['source', 'game_id', 'datetime', 'team1', 'team2', 'team1_wins', 'team2_wins']
+		# let's keep it 1 resource per file, ok?
+		resource_name = filename_to_parsername(getfile(self.__class__))
+		GenericParser.__init__(self, url, resource_name, resource_type, fields_we_need)
+
 	def print_result_pretty(self, bet_data):
 		dt_string = bet_data['datetime'].strftime("%B %d %H:%M")
 		name_length = 20
