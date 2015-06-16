@@ -37,7 +37,7 @@ class Parser(BetParser):
 		result['team2_wins'] = float(bet_jsoned['coef_2'])
 		# I don't know the difference between these. Let's assume they're equal and pick first one
 		self.assume(bet_jsoned['date'] == bet_jsoned['date_t'])
-		result['datetime'] = datetime.fromtimestamp(int(bet_jsoned['date']))
+		result['datetime'] = datetime.utcfromtimestamp(int(bet_jsoned['date']))
 		return result
 		
 
