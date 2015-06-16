@@ -29,10 +29,11 @@ class Parser(BetParser):
 				else:
 					yield self.parse_bet(bet)
 	def parse_bet(self, bet_jsoned):
-		result = {}
-		fields_we_need_here = ['gamer_1', 'gamer_2', 'coef_1', 'coef_2', 'date', 'date_t']
+		result = {'source':self.resource_name}
+		fields_we_need_here = ['gamer_1', 'gamer_2', 'coef_1', 'coef_2', 'date', 'date_t', 'id']
 		self.assume(all(field in bet_jsoned for field in fields_we_need_here))
 		self.assume('nick' in bet_jsoned['gamer_1'] and 'nick' in bet_jsoned['gamer_2'])
+		result['game_id'] = bet_jsoned['id'].strip()
 		result['team1'] = bet_jsoned['gamer_1']['nick'].strip()
 		result['team2'] = bet_jsoned['gamer_2']['nick'].strip()
 		result['team1_wins'] = float(bet_jsoned['coef_1'])
