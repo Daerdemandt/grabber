@@ -132,7 +132,7 @@ class GenericParser(object):
 
 class BetParser(GenericParser):
 	def __init__(self, url, resource_type):
-		fields_we_need = ['source', 'game_id', 'datetime', 'team1', 'team2', 'team1_wins', 'team2_wins']
+		fields_we_need = ['source', 'game_id', 'datetime', 'team1', 'team2', 'team1_wins', 'team2_wins', 'league_id']
 		# let's keep it 1 resource per file, ok?
 		resource_name = filename_to_parsername(getfile(self.__class__))
 		GenericParser.__init__(self, url, resource_name, resource_type, fields_we_need)
