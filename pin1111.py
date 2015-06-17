@@ -32,7 +32,7 @@ class LeagueParser(BetParser):
 			bet_data = {'source':self.resource_name}
 			bet_data['game_id'] = event['EventId']
 			dt = strptime(event['DateAndTime'].strip(), '%Y-%m-%dT%H:%M:%SZ')
-			bet_data['datetime'] = datetime.utcfromtimestamp(mktime(dt)) # check if it's really UTC
+			bet_data['datetime'] = datetime.fromtimestamp(mktime(dt))
 			team1, team2 = None, None
 			for p in event['Participants']:
 				fields_we_need_here = ['MoneyLine', 'Name', 'Type']
