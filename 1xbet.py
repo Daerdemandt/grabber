@@ -21,11 +21,12 @@ class Parser(BetParser):
 		# Last entry is just a string so we don't parse it
 		for bet in bets_table[:-1]:
 			bet_data = {'source':self.resource_name}
-			# Let's get the ID
+			# Let's get IDs of game and league
 			namestring = self.find_only(bet, 'td', class_='name')
 			# If the name is clicked, script is called
 			call = namestring.a['onclick']
 			arguments = call.replace(')', '(').split('(')[1].split(', ')
+			bet_data['league_id'] = arguments[1]
 			bet_data['game_id'] = arguments[2]
 			# Let's get competing teams' names
 			game_name = self.find_only(bet, class_='gname hotGameTitle')
