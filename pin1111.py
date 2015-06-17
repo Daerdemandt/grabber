@@ -43,9 +43,8 @@ class LeagueParser(BetParser):
 				if p['Type'] == 'Team2':
 					self.assume(team2 == None)
 					team2 = p
-			if team1['MoneyLine'] == None or team2['MoneyLine'] == None:
-				print("Found")
-				print(self.url)
+			self.assume(team1['MoneyLine'] and team2['MoneyLine'])
+			self.assume(team1['Name'] and team2['Name'])
 			bet_data['team1_wins'] = money_line_to_odds(team1['MoneyLine'])
 			bet_data['team2_wins'] = money_line_to_odds(team2['MoneyLine'])
 			bet_data['team1'] = team1['Name'].strip()
@@ -68,13 +67,13 @@ class Parser(BetParser):
 		all_leagues = body.find_all('a')
 		for league in all_leagues:
 			league_ref = league['href']
-			#print(league.prettify())
 			league_id = league_ref.split('=')[1]
 			lp = LeagueParser(league_id)
-			yield from lp.get_data()
+			for game_data in lp.get_data():
+				game_data['league_id'] = league_id
+				yield game_data
 
 def main():
-#	Parser().do_static_cast()
 	Parser().print_results_pretty()
 			
 if __name__ == "__main__":
