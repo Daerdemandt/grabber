@@ -77,7 +77,7 @@ class GenericParser(object):
 	
 	def assume(self, check=False):
 		if not check:
-			raise ParseError('Error: page at ' + URL + " doesn't comply to assumed format")
+			raise ParseError('Error: page at ' + self.url + " doesn't comply to assumed format")
 
 	def do_static_cast(self):
 		self.results = tuple(self.results)
