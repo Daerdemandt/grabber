@@ -17,14 +17,11 @@ class Parser(BetParser):
 		yield from self.parse_bet_list(self.resource['bets'])
 	
 	def parse_bet_list(self, bet_list_jsoned):
+		print('parse_bet_list is called on list of len', len(bet_list_jsoned))
 		for bet in bet_list_jsoned:
 			if bet['deleted'] == 0: # Haven't seen single record that had this not 0. But, it can happen one day.
-				if 'nb_arr' in bet: # there are nested bets
-					pass
-					# Uncomment this line if you need nested bets, like "will win 1st round" or "will take FB". There seem to be only top-level bets and 1-nested, not deeper.
-#					yield from parse_bet_list(bet['nb_arr'])
-				else:
-					yield self.parse_bet(bet)
+				yield self.parse_bet(bet)
+				
 	def parse_bet(self, bet_jsoned):
 		result = {'source':self.resource_name}
 		fields_we_need_here = ['gamer_1', 'gamer_2', 'coef_1', 'coef_2', 'date', 'date_t', 'id']
@@ -37,7 +34,7 @@ class Parser(BetParser):
 		result['team2_wins'] = float(bet_jsoned['coef_2'])
 		# I don't know the difference between these. Let's assume they're equal and pick first one
 		self.assume(bet_jsoned['date'] == bet_jsoned['date_t'])
-		result['datetime'] = datetime.utcfromtimestamp(int(bet_jsoned['date']))
+		result['datetime'] = datetime.fromtimestamp(int(bet_jsoned['date']))
 		return result
 		
 
