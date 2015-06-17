@@ -66,6 +66,7 @@ class Parser(BetParser):
 		body = self.find_only(body, 'div', class_='esportsBody')
 		all_leagues = body.find_all('a')
 		for league in all_leagues:
+			self.assume('href' in league.attrs and '=' in league['href'])
 			league_ref = league['href']
 			league_id = league_ref.split('=')[1]
 			lp = LeagueParser(league_id)
