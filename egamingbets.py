@@ -6,7 +6,7 @@
 # Several assumptions about page format are made. If any of them is violated, ParseError is raised.
 
 from datetime import datetime
-from misc import BetParser
+from bet_parser import BetParser
 
 class Parser(BetParser):
 	def __init__(self):

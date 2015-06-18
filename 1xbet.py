@@ -7,7 +7,7 @@
 
 from datetime import datetime
 import bs4
-from misc import BetParser, UTC
+from bet_parser import BetParser
 
 class Parser(BetParser):
 	def __init__(self):
@@ -51,7 +51,7 @@ class Parser(BetParser):
 					year += 1
 				hour, minute = time.split(':')
 				hour, minute = int(hour), int(minute)
-				bet_data['datetime'] = datetime(year, month, day, hour, minute, tzinfo=UTC())
+				bet_data['datetime'] = datetime(year, month, day, hour, minute, tzinfo=self.UTC)
 			except ValueError:
 				self.assume()	
 			# Finally, let's get odds we need

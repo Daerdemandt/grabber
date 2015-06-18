@@ -5,7 +5,7 @@
 # If you import this file, use get_data method.
 # Several assumptions about page format are made. If any of them is violated, ParseError is raised.
 
-from misc import BetParser
+from bet_parser import BetParser
 from time import strptime, mktime
 from datetime import datetime
 
