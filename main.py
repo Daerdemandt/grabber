@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Calls other scripts that get the data.
-from os import listdir
+from os import listdir, path # to get files in the directory
 from importlib import import_module
 
 # TODO: make it either relative to this file or sth.
@@ -11,10 +11,12 @@ import sys # so we can import BP; is to be removed when everything is made as a 
 sys.path.append(bet_parsers_dir)
 from bet_parser import BetParser
 
-def read_parsers():
+def read_bet_parsers(parsers_dir):
 	parsers = {}
-	stoplist = set(['main.py', 'misc.py', '__pycache__', 'generic_parser.py', 'bet_parser.py'])
-	filenames = set(f for f in listdir(bet_parsers_dir) if f[0] != '.') - stoplist
+	ignored = set(['bet_parser.py'])
+	def isfile(name):
+		return path.isfile(path.join(parsers_dir, name))
+	filenames = set(filter(isfile, listdir(parsers_dir))) - ignored
 	parsernames = [BetParser.name_from_filename(f) for f in filenames]
 	result = {}
 	for name in parsernames:
@@ -25,9 +27,8 @@ def read_parsers():
 	return parsers
 
 def main():
-	parsers = read_parsers()
+	parsers = read_bet_parsers(bet_parsers_dir)
 	for name in parsers:
-#		print('From ' + name + ':')
 		parsers[name].print_results_pretty()
 
 if __name__ == "__main__":
