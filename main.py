@@ -2,13 +2,13 @@
 # Calls other scripts that get the data.
 from os import listdir
 from importlib import import_module
-from misc import filename_to_parsername
+from misc import BetParser
 
 def read_parsers():
 	parsers = {}
 	stoplist = set(['main.py', 'misc.py', '__pycache__'])
 	filenames = set(f for f in listdir() if f[0] != '.') - stoplist
-	parsernames = [filename_to_parsername(f) for f in filenames]
+	parsernames = [BetParser.name_from_filename(f) for f in filenames]
 	result = {}
 	for name in parsernames:
 		module = import_module(name)
