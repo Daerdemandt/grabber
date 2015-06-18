@@ -57,8 +57,11 @@ class Parser(BetParser):
 			# Finally, let's get odds we need
 			def get_odds(betname):
 				return float(self.find_only(bet, 'div', {'data-betname':betname}).string.strip())
-			bet_data['team1_wins'] = get_odds('П1')
-			bet_data['team2_wins'] = get_odds('П2')
+			try:
+				bet_data['team1_wins'] = get_odds('П1')
+				bet_data['team2_wins'] = get_odds('П2')
+			except self.Error: # sometimes there's just handicap
+				continue
 			yield bet_data
 		
 def main():

@@ -67,6 +67,8 @@ class GenericParser(object):
 		
 		self.fields_we_need = fields_we_need
 		
+		self.Error = ParseError
+		
 		self.results = self.get_data()
 	
 	def find_only(self, where, *args, **kwargs): # beatifulsoup-only
