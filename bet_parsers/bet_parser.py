@@ -1,4 +1,7 @@
+import sys # so we can import GP; is to be removed when everything is made as a package
+sys.path.append('./..')
 from generic_parser import GenericParser
+
 from datetime import timedelta, tzinfo # create UTC timezone - BP
 from inspect import getfile # to get instance's filename
 from os import path # to strip filename of unneeded stuff
