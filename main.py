@@ -29,7 +29,7 @@ def read_bet_parsers(parsers_dir):
 def main():
 	parsers = read_bet_parsers(bet_parsers_dir)
 	for name in parsers:
-		parsers[name].print_results_pretty()
+		parsers[name].print_results_csv()
 
 if __name__ == "__main__":
 	main()

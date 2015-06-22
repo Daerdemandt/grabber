@@ -17,7 +17,7 @@ class UTC(tzinfo):
 
 class BetParser(GenericParser):
 	def __init__(self, url, resource_type):
-		fields_we_need = ['source', 'game_id', 'datetime', 'team1', 'team2', 'team1_wins', 'team2_wins', 'league_id']
+		fields_we_need = ['source', 'game_id', 'datetime', 'team1', 'team2', 'team1_wins', 'team2_wins', 'league_id', 'discipline']
 		# let's keep it 1 resource per file, ok?
 		resource_name = self.name_from_filename(getfile(self.__class__))
 		GenericParser.__init__(self, url, resource_name, resource_type, fields_we_need)

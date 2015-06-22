@@ -17,13 +17,16 @@ class Parser(BetParser):
 		yield from self.parse_bet_list(self.resource['bets'])
 	
 	def parse_bet_list(self, bet_list_jsoned):
-		print('parse_bet_list is called on list of len', len(bet_list_jsoned))
+#		print('parse_bet_list is called on list of len', len(bet_list_jsoned))
 		for bet in bet_list_jsoned:
 			if bet['deleted'] == 0: # Haven't seen single record that had this not 0. But, it can happen one day.
 				yield self.parse_bet(bet)
 				
 	def parse_bet(self, bet_jsoned):
 		result = {'source':self.resource_name}
+		#TODO: it is a stub, redo it properly
+#		print(recognize_game(bet_jsoned['game']), bet_jsoned['game'])
+		result['discipline'] = recognize_game(bet_jsoned['game'])
 		fields_we_need_here = ['gamer_1', 'gamer_2', 'coef_1', 'coef_2', 'date', 'date_t', 'id', 'tourn']
 		self.assume(all(field in bet_jsoned for field in fields_we_need_here))
 		self.assume('nick' in bet_jsoned['gamer_1'] and 'nick' in bet_jsoned['gamer_2'])
@@ -37,7 +40,29 @@ class Parser(BetParser):
 		self.assume(bet_jsoned['date'] == bet_jsoned['date_t'])
 		result['datetime'] = datetime.fromtimestamp(int(bet_jsoned['date']))
 		return result
-		
+
+
+#TODO: it is a stub, reimplement properly		
+import re
+def recognize_game(gamename):
+	'''
+Return normalized name of the game, provided with game name
+
+Counter-Strike: Global Offensive -> CSGO
+LoL -> LOL
+	'''
+	exp = {}
+	exp['CSGO'] = re.compile('counter.?.?.?strike|CS', re.IGNORECASE)
+	exp['HOTS'] = re.compile('heroes.*storm|HOTS', re.IGNORECASE)
+	exp['SC2'] = re.compile('starcraft', re.IGNORECASE)
+	exp['DOTA2'] = re.compile('dota', re.IGNORECASE)
+	exp['HS'] = re.compile('heartstone', re.IGNORECASE)
+	exp['LOL'] = re.compile('League.*Legends|LOL', re.IGNORECASE)
+	exp['WOT'] = re.compile('World.*Tanks|WOT', re.IGNORECASE)
+	for e in exp:
+		if exp[e].match(gamename):
+			return e
+	return "UNKNOWN_GAME"
 
 def main():
 	Parser().print_results_pretty()

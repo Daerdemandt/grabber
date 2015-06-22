@@ -9,6 +9,9 @@ from datetime import datetime
 import bs4
 from bet_parser import BetParser
 
+# temporary
+import re
+
 class Parser(BetParser):
 	def __init__(self):
 		BetParser.__init__(self, 'https://1-x-bet.com/line/KiberSport/', 'html')
@@ -149,6 +152,7 @@ Result will be {'team1':'Invictus Gaming', 'team2':'Fnatic',
 		result['league_name'] = league_name_string
 		return result
 	
+		
 #TODO: implement this
 	def split_with_discipline(self, string):
 		'''
@@ -157,6 +161,23 @@ Return normalised name of discipline and remainder of the string
 'КиберСпорт. Dota 2. ESL One' -> ('КиберСпорт. ', 'Dota2', '. ESL One',)
 'Киберcпорт. Counter-Strike: Global Offensive - ESL ESEA Pro' -> ('Киберcпорт. ', 'CSGO', ' - ESL ESEA Pro',)
 '''
+		exp = {}
+#	print(gamename)
+		exp['CSGO'] = re.compile('counter.?.?.?strike|CS', re.IGNORECASE)
+		exp['HOTS'] = re.compile('heroes.*storm|HOTS', re.IGNORECASE)
+		exp['SC2'] = re.compile('starcraft', re.IGNORECASE)
+		exp['DOTA2'] = re.compile('dota', re.IGNORECASE)
+		exp['HS'] = re.compile('heartstone', re.IGNORECASE)
+		exp['LOL'] = re.compile('League.*Legends|LoL', re.IGNORECASE)
+		exp['WOT'] = re.compile('World.*Tanks|WOT', re.IGNORECASE)
+		for e in exp:
+			m = exp[e].search(string)
+			if m:
+				head, tail = string.split(m.group())
+				return head, e, tail
+		return ('NOT_IMPLEMENTED', "UNKNOWN_GAME", 'NOT_IMPLEMENTED',)
+
+
 		return ('NOT_IMPLEMENTED', 'NOT_IMPLEMENTED', 'NOT_IMPLEMENTED',)
 #TODO: implement this
 	def recognize_name(self, string):
