@@ -39,27 +39,54 @@ class Parser(BetParser):
 				bet_data['datetime'] = self.parse_datetime_string(dt_string)
 				
 				# Finally, let's get odds we need
-				# sometimes there's just handicap, it raises ParseError
-				#TODO:
-				bet_data['team1_wins'] = self.get_odd(bet, 'П1')
-				bet_data['team2_wins'] = self.get_odd(bet, 'П2')
+				bet_data.update(self.get_odds(bet))
 			except self.InvalidPiece:
 				#TODO: probably log that we had to omit this entry
 				continue
 			except self.ParsingError:
 				# Now that's serious.
 				# TODO: definitely log this
+				print(bet.prettify())
 				continue
 			yield bet_data
+	
+	def get_odds(self, bet):
+		'''
+	Provided with bs4-parsed HTML of a bet, return odds for 2 teams.
 
-	def get_odd(self, bet, betname):
+	Example:
+	...
+	<div data-betname="П1" data-coef="1.81" data-evid="5548734701" data-gameid="55487347" data-group="1" data-param="0" data-player="0" data-type="1" title="">
+		1.81
+	</div>
+	...
+	<div data-betname="П2" data-coef="1.9" data-evid="5548734703" data-gameid="55487347" data-group="1" data-param="0" data-player="0" data-type="3" title="">
+		1.9
+	</div>
+	...
+
+	Returns {'team1_wins':1.81, 'team2_wins':1.9}
 		'''
+		def get_odd(bet, betname):
+			'''
 	Provided with bs4-parsed HTML of a bet, return odd with a given name
-		'''
+	
+	For example, for
+	<div data-betname="П1" data-coef="1.81" data-evid="5548734701" data-gameid="55487347" data-group="1" data-param="0" data-player="0" data-type="1" title="">
+		1.81
+	</div>
+	return value will be 1.81
+			'''
+			odd = self.find_only_maybe(bet, 'div', {'data-betname':betname})
+			return float(odd.string.strip())
+
+		result = {}
 		try:
-			return float(self.find_only(bet, 'div', {'data-betname':betname}).string.strip())
+			result['team1_wins'] = get_odd(bet, 'П1')
+			result['team2_wins'] = get_odd(bet, 'П2')
 		except ValueError:
-			raise self.Error
+			raise self.ParsingError
+		return result
 
 	def parse_bet_name(self, bet_name):
 		'''
@@ -142,7 +169,7 @@ Result will be {'team1':'Invictus Gaming', 'team2':'Fnatic',
 		# Let's get competing teams' names
 		match_name = game_title.string.strip()
 		# We assume that teams' names don't contain '—'
-		self.assume(1 == match_name.count('—'))
+		self.assume_maybe(1 == match_name.count('—'))
 		result['team1'], result['team2'] = map(self.recognize_name, match_name.split(' — '))
 		# Done with names, let's get discipline and league
 		self.assume('title' in game_title.attrs)
