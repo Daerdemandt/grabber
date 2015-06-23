@@ -41,17 +41,21 @@ class Parser(BetParser):
 				# Finally, let's get odds we need
 				# sometimes there's just handicap, it raises ParseError
 				#TODO:
-				bet_data['team1_wins'] = self.parse_odds(bet, 'П1')
-				bet_data['team2_wins'] = self.parse_odds(bet, 'П2')
-			except self.Error:
-				#TODO: log that we had to omit this entry
+				bet_data['team1_wins'] = self.get_odd(bet, 'П1')
+				bet_data['team2_wins'] = self.get_odd(bet, 'П2')
+			except self.InvalidPiece:
+				#TODO: probably log that we had to omit this entry
+				continue
+			except self.ParsingError:
+				# Now that's serious.
+				# TODO: definitely log this
 				continue
 			yield bet_data
 
-	def parse_odds(self, bet, betname):
+	def get_odd(self, bet, betname):
 		'''
-Provided with bs4-parsed HTML of a bet, return odd with a given name
-'''
+	Provided with bs4-parsed HTML of a bet, return odd with a given name
+		'''
 		try:
 			return float(self.find_only(bet, 'div', {'data-betname':betname}).string.strip())
 		except ValueError:

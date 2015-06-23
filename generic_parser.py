@@ -5,8 +5,8 @@ import csv # printing in csv
 import sys # redirecting output
 from abc import ABCMeta, abstractmethod # GenericParser is an abstract class
 
-class ParseError(Exception):
-	pass
+#class ParseError(Exception):
+#	pass
 
 class GenericParser(object):
 	__metaclass__ = ABCMeta
@@ -52,19 +52,73 @@ class GenericParser(object):
 		
 		self.fields_we_need = fields_we_need
 		
-		self.Error = ParseError
+		#TODO: Probably it would be better to make factory for these
+		class AbstractParsingException(Exception):
+			'''
+	Abstract parsing exception.
+	
+	Any way to express how exactly things can go wrong while
+	parsing something probably should be inherited from it.
+			'''
+			__metaclass__ = ABCMeta
+			def __init__(self, message):
+				full_message = '{} at {}( {} )'.format(message, resource_name, url)
+				super().__init__(message)
+		
+		self.AbstractParsingException = AbstractParsingException
+
+		
+		class ParsingError(AbstractParsingException):
+			'''
+	Exception that is thrown when source we're parsing does not conform
+	to assumed structure and thus can not be parsed at all.
+	
+	This is a serious thing.
+			'''
+		self.ParsingError = ParsingError
+		
+		class InvalidPiece(AbstractParsingException):
+			'''
+	Exception to skip further parsing of piece.
+	
+	EAFP. Sometimes, the easiest way to see whether the piece can be
+	parsed is to actually try to parse it and see what happens.
+	If we have the piece that can be unparseable and it is OK, then
+	we should raise this exception to skip the rest of parsing.
+	
+	This is a part of normal process.
+			'''
+		self.InvalidPiece = InvalidPiece
 		
 		self.results = self.get_data()
 	
 	def find_only(self, where, *args, **kwargs): # beatifulsoup-only
+		'''
+	Similar to bs4.find, but raises InvalidPiece if there're more or
+	less than 1 results found.
+		'''
+		assert self.resource_type == 'html'
+		results = where.find_all(*args, **kwargs)
+		self.assume_maybe(len(results) == 1)
+		return results[0]
+
+	def find_only_strict(self, where, *args, **kwargs): # beatifulsoup-only		
+		'''
+		Similar to bs4.find, but raises ParsingError if there're more
+		or less than 1 results found.
+		'''
 		assert self.resource_type == 'html'
 		results = where.find_all(*args, **kwargs)
 		self.assume(len(results) == 1)
 		return results[0]
 	
+	def assume_maybe(self, check=False):
+		if not check:
+			raise self.InvalidPiece('Assumption about document format failed')
+
 	def assume(self, check=False):
 		if not check:
-			raise ParseError('Error: page at ' + self.url + " doesn't comply to assumed format")
+			raise self.ParsingError('Assumption about document format failed')
 
 	def do_static_cast(self):
 		self.results = tuple(self.results)
