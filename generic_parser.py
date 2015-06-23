@@ -92,7 +92,7 @@ class GenericParser(object):
 		
 		self.results = self.get_data()
 	
-	def find_only(self, where, *args, **kwargs): # beatifulsoup-only
+	def find_only_maybe(self, where, *args, **kwargs): # beatifulsoup-only
 		'''
 	Similar to bs4.find, but raises InvalidPiece if there're more or
 	less than 1 results found.
@@ -102,7 +102,7 @@ class GenericParser(object):
 		self.assume_maybe(len(results) == 1)
 		return results[0]
 
-	def find_only_strict(self, where, *args, **kwargs): # beatifulsoup-only		
+	def find_only(self, where, *args, **kwargs): # beatifulsoup-only		
 		'''
 		Similar to bs4.find, but raises ParsingError if there're more
 		or less than 1 results found.
