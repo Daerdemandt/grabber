@@ -12,6 +12,8 @@ from hashlib import md5
 
 import sys, os, time, atexit, signal
 
+from config import pid_files_folder as config_pid_files_folder
+
 class GenericDaemon:
 	'''
 	Generic daemon abstract class.
@@ -23,14 +25,15 @@ class GenericDaemon:
 	def run():
 		'''Implement this in children classes.'''
 
-	def __init__(self, pid_file_name=None):
+	def __init__(self, pid_file_name=None, pid_file_folder=None):
+		if not pid_file_folder:
+			pid_file_folder = config_pid_files_folder
 		if not pid_file_name:
 			source_filename = getfile(self.__class__)
 			child_name = self.__class__.__name__
 			unique_name = '{}:{}'.format(source_filename, child_name)
 			# We use md5 because if one wants collision he will get them anyway
 			unique_id = md5(unique_name.encode()).hexdigest()
-			pid_file_folder = '/home/user/grabber/pidfiles' #'/var/run'
 			pid_file_name = '{}/{}-pidfile.{}'.format(pid_file_folder, child_name, unique_id)
 		assert pid_file_name
 		self.pid_file_name = pid_file_name

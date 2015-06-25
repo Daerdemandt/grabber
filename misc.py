@@ -6,21 +6,12 @@ from importlib import import_module
 from itertools import chain
 from functools import reduce
 
-import json
-def get_config():
-	full_script_name = path.abspath(__file__)
-	dirname = path.dirname(full_script_name)
-	if dirname[-1] != '/':
-		dirname += '/'
-	config_name = dirname + 'config.json'
-	return json.load(open(config_name))
-
 # TODO: make it either relative to this file or sth.
 # Can change if everything is made into package
-bet_parsers_dir = get_config()['bet_parsers_dir']
+import config
 
 import sys # so we can import BP; is to be removed when everything is made as a package
-sys.path.append(bet_parsers_dir)
+sys.path.append(config.bet_parsers_dir)
 from bet_parser import BetParser
 
 
@@ -51,28 +42,17 @@ class file_dict(dict):
 
 class BetDataManager(object):
 	def __init__(self):
-		self.read_config()
-		self.ignored_sources |= set(['bet_parser.py'])
-		
-	def read_config(self):
-		config = get_config()
-		# we won't need it with proper packaging
-		self.bet_parsers_dir = config['bet_parsers_dir']
-		
-		self.data_filename = config['data_filename']
-		self.seconds_between_updates = config['seconds_between_updates']
-		self.pid_files_folder = config['pid_files_folder']
-		self.ignored_sources = set(config['ignored_sources'])
+		self.ignored_sources = config.ignored_sources | set(['bet_parser.py'])
 
 	def export(self):
-		with open(self.data_filename, 'rb') as cache_file:
+		with open(config.data_filename, 'rb') as cache_file:
 			data = load(cache_file)
 			return tuple(data.values())
 	
 	def update_data(self):
 		print('Updating data:')
 		if not hasattr(self, 'data'):
-			self.data = file_dict(self.data_filename)
+			self.data = file_dict(config.data_filename)
 			print('{} entries loaded'.format(len(self.data)))
 						
 		new_data = self.get_new_data()
@@ -86,8 +66,8 @@ class BetDataManager(object):
 	def read_bet_parsers(self):
 		parsers = {}
 		def isfile(name):
-			return path.isfile(path.join(self.bet_parsers_dir, name))
-		filenames = set(filter(isfile, listdir(bet_parsers_dir))) - self.ignored_sources
+			return path.isfile(path.join(config.bet_parsers_dir, name))
+		filenames = set(filter(isfile, listdir(config.bet_parsers_dir))) - self.ignored_sources
 		parsernames = [BetParser.name_from_filename(f) for f in filenames]
 		result = {}
 		for name in parsernames:

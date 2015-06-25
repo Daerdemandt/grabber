@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from server import run_server
 
+from config import http_port
+
 from generic_daemon import GenericDaemon
 import sys
 
@@ -8,15 +10,15 @@ class HTTPDaemon(GenericDaemon):
 	'''
 	Runs HTTP server
 	'''
-	def __init__(self, port=80, pid_file_name=None):
-		super().__init__(pid_file_name)
+	def __init__(self, port=80):
+		super().__init__()
 		self.port = port
 	def run(self):
 		run_server(self.port)
 	
 
 if __name__ == "__main__":
-	daemon = HTTPDaemon()
+	daemon = HTTPDaemon(port=http_port)
 	if len(sys.argv) == 2:
 		if 'start' == sys.argv[1]:
 			daemon.start()

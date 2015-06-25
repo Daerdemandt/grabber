@@ -2,6 +2,7 @@
 from misc import BetDataManager
 from generic_daemon import GenericDaemon
 
+from config import seconds_between_updates
 import time, sys
 
 class UpdaterDaemon(GenericDaemon):
@@ -14,9 +15,7 @@ class UpdaterDaemon(GenericDaemon):
 	def run(self):
 		while True:
 			self.data_manager.update_data()
-#			data = update_data()
-#			print('{} entries total'.format(len(data)))
-			time.sleep(self.data_manager.seconds_between_updates)
+			time.sleep(seconds_between_updates)
 	def drop_all_data(self):
 		pass
 	def drop_old_data(self):
