@@ -5,8 +5,8 @@ from importlib import import_module
 
 # TODO: make it either relative to this file or sth.
 # Can change if everything is made into package
-bet_parsers_dir = './bet_parsers'
-data_filename = 'data.bin'
+bet_parsers_dir = '/home/user/grabber/bet_parsers'
+data_filename = '/home/user/grabber/data.bin'
 
 import sys # so we can import BP; is to be removed when everything is made as a package
 sys.path.append(bet_parsers_dir)

@@ -30,7 +30,7 @@ class GenericDaemon:
 			unique_name = '{}:{}'.format(source_filename, child_name)
 			# We use md5 because if one wants collision he will get them anyway
 			unique_id = md5(unique_name.encode()).hexdigest()
-			pid_file_folder = '/var/run'
+			pid_file_folder = '/home/user/grabber/pidfiles' #'/var/run'
 			pid_file_name = '{}/{}-pidfile.{}'.format(pid_file_folder, child_name, unique_id)
 		assert pid_file_name
 		self.pid_file_name = pid_file_name
@@ -64,15 +64,15 @@ class GenericDaemon:
 			sys.exit(1) 
 	
 		# redirect standard file descriptors
-		sys.stdout.flush()
-		sys.stderr.flush()
-		si = open(os.devnull, 'r')
-		so = open(os.devnull, 'a+')
-		se = open(os.devnull, 'a+')
+#		sys.stdout.flush()
+#		sys.stderr.flush()
+#		si = open(os.devnull, 'r')
+#		so = open(os.devnull, 'a+')
+#		se = open(os.devnull, 'a+')
 
-		os.dup2(si.fileno(), sys.stdin.fileno())
-		os.dup2(so.fileno(), sys.stdout.fileno())
-		os.dup2(se.fileno(), sys.stderr.fileno())
+#		os.dup2(si.fileno(), sys.stdin.fileno())
+#		os.dup2(so.fileno(), sys.stdout.fileno())
+#		os.dup2(se.fileno(), sys.stderr.fileno())
 	
 		# write pidfile
 		atexit.register(self.delpid)
