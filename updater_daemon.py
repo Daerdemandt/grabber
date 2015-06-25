@@ -15,6 +15,10 @@ class UpdaterDaemon(GenericDaemon):
 			data = update_data()
 #			print('{} entries total'.format(len(data)))
 			time.sleep(seconds_between_updates)
+	def drop_all_data(self):
+		pass
+	def drop_old_data(self):
+		pass
 
 if __name__ == "__main__":
 	daemon = UpdaterDaemon()
