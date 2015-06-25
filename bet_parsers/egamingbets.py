@@ -56,7 +56,7 @@ LoL -> LOL
 	exp['HOTS'] = re.compile('heroes.*storm|HOTS', re.IGNORECASE)
 	exp['SC2'] = re.compile('starcraft', re.IGNORECASE)
 	exp['DOTA2'] = re.compile('dota', re.IGNORECASE)
-	exp['HS'] = re.compile('heartstone', re.IGNORECASE)
+	exp['HS'] = re.compile('hearthstone', re.IGNORECASE)
 	exp['LOL'] = re.compile('League.*Legends|LOL', re.IGNORECASE)
 	exp['WOT'] = re.compile('World.*Tanks|WOT', re.IGNORECASE)
 	for e in exp:
