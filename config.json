@@ -1,0 +1,8 @@
+{
+	"bet_parsers_dir": "/home/user/grabber/bet_parsers",
+	"data_filename": "/home/user/grabber/data.bin",
+	"seconds_between_updates": 10,
+	"pid_files_folder": "/home/user/grabber/pidfiles",
+	"ignored_sources": [],
+	"http_port": 8000
+}

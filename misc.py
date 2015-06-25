@@ -3,67 +3,44 @@
 from os import listdir, path # to get files in the directory
 from importlib import import_module
 
+from itertools import chain
+from functools import reduce
+
+import json
+def get_config():
+	full_script_name = path.abspath(__file__)
+	dirname = path.dirname(full_script_name)
+	if dirname[-1] != '/':
+		dirname += '/'
+	config_name = dirname + 'config.json'
+	return json.load(open(config_name))
+
 # TODO: make it either relative to this file or sth.
 # Can change if everything is made into package
-bet_parsers_dir = '/home/user/grabber/bet_parsers'
-data_filename = '/home/user/grabber/data.bin'
+bet_parsers_dir = get_config()['bet_parsers_dir']
 
 import sys # so we can import BP; is to be removed when everything is made as a package
 sys.path.append(bet_parsers_dir)
 from bet_parser import BetParser
 
-def read_bet_parsers(parsers_dir):
-	parsers = {}
-	ignored = set(['bet_parser.py'])
-	def isfile(name):
-		return path.isfile(path.join(parsers_dir, name))
-	filenames = set(filter(isfile, listdir(parsers_dir))) - ignored
-	parsernames = [BetParser.name_from_filename(f) for f in filenames]
-	result = {}
-	for name in parsernames:
-		module = import_module(name)
-		Parser = getattr(module, 'Parser')
-		parser = Parser()
-		parsers[name] = parser
-	return parsers
-
-from itertools import chain
-from functools import reduce
-def get_new_data(fields=None):
-	parsers = read_bet_parsers(bet_parsers_dir)
-	data_by_parser = {}
-	for name in parsers:
-		parsers[name].do_static_cast()
-		data_by_parser[name] = parsers[name].results
-	def unique_id(entry):
-		return '{}::{}'.format(entry['source'], entry['game_id'])
-	data = {unique_id(entry):entry for entry in reduce(chain, data_by_parser.values())}
-	return data
 
 from pickle import dump, load
 from weakref import finalize
 
-class file_set(set):
+class file_dict(dict):
 	'''
-	Set that is initiated from a given file (if it exists) and
+	Dictionary that is initiated from a given file (if it exists) and
 	writes its own contents to the same file on deletion.
 	'''
 	def __init__(self, filename):
-		''' Read contents of set from file, set up deletion hook '''
+		''' Read contents of dictionary from file, set up deletion hook '''
 		self.filename = filename
-		super().__init__(self)
-		if not isinstance(filename, str):
-			return
+		dict.__init__(self)
 		try:
-			print(self.filename)
 			with open(self.filename, 'rb') as cache_file:
-				l = load(cache_file)
-				print(l, type(l))
-				self |= l
-#				self |= load(cache_file)
+				self.update(load(cache_file))
 		except FileNotFoundError:
-			with open(self.filename, 'a'):
-				pass # create the file if it does not exist
+			pass # on read, don't create the file if it does not exist
 		# when object is deleted, update file
 		finalize(self, lambda: self.dump_to_file())
 	
@@ -71,34 +48,63 @@ class file_set(set):
 		with open(self.filename, 'wb+') as cache_file:
 			dump(self, cache_file)
 
-def load_existing_data():
-	try:
-		with open(data_filename, 'rb') as cache_file:
+
+class BetDataManager(object):
+	def __init__(self):
+		self.read_config()
+		self.ignored_sources |= set(['bet_parser.py'])
+		
+	def read_config(self):
+		config = get_config()
+		# we won't need it with proper packaging
+		self.bet_parsers_dir = config['bet_parsers_dir']
+		
+		self.data_filename = config['data_filename']
+		self.seconds_between_updates = config['seconds_between_updates']
+		self.pid_files_folder = config['pid_files_folder']
+		self.ignored_sources = set(config['ignored_sources'])
+
+	def export(self):
+		with open(self.data_filename, 'rb') as cache_file:
 			data = load(cache_file)
-	except FileNotFoundError:
-		with open(data_filename, 'a'):
-			pass # create the file if it does not exist
-		data = {}
-	return data
-
-def dump_existing_data(data):
-	with open(data_filename, 'wb+') as cache_file:
-		dump(data, cache_file)
-
-
-def update_data():
-# TODO: find way to avoid duplicates
-# TODO: find out why file_set doesn't work
-	print('Updating data:')
-	data = load_existing_data()
-	print('{} old entries loaded'.format(len(data)))
-#	print(data)
-	new_data = get_new_data()
-	print('{} new entries fetched'.format(len(new_data)))
-	data.update(new_data)
-#	for name in new_data:
-#		data += list(new_data[name])
-	dump_existing_data(data)
-	print('{} entries total'.format(len(data)))
+			return tuple(data.values())
 	
-	return data
+	def update_data(self):
+		print('Updating data:')
+		if not hasattr(self, 'data'):
+			self.data = file_dict(self.data_filename)
+			print('{} entries loaded'.format(len(self.data)))
+						
+		new_data = self.get_new_data()
+		print('{} new entries fetched'.format(len(new_data)))
+
+		self.data.update(new_data)
+		print('{} entries total'.format(len(self.data)))
+		
+		self.data.dump_to_file()
+	
+	def read_bet_parsers(self):
+		parsers = {}
+		def isfile(name):
+			return path.isfile(path.join(self.bet_parsers_dir, name))
+		filenames = set(filter(isfile, listdir(bet_parsers_dir))) - self.ignored_sources
+		parsernames = [BetParser.name_from_filename(f) for f in filenames]
+		result = {}
+		for name in parsernames:
+			module = import_module(name)
+			Parser = getattr(module, 'Parser')
+			parser = Parser()
+			parsers[name] = parser
+		return parsers
+
+	def get_new_data(self):
+		parsers = self.read_bet_parsers()
+		data_by_parser = {}
+		for name in parsers:
+			parsers[name].do_static_cast()
+			data_by_parser[name] = parsers[name].results
+		def unique_id(entry):
+			return '{}::{}'.format(entry['source'], entry['game_id'])
+		data = {unique_id(entry):entry for entry in reduce(chain, data_by_parser.values())}
+		return data	
+

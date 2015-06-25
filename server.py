@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import http.server
 import socketserver
-
-from misc import load_existing_data
+from misc import BetDataManager
 import json
 
 Handler = http.server.SimpleHTTPRequestHandler
@@ -53,8 +52,10 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 			result['entrant1_odds'] = entry['team1_wins']
 			result['entrant2_odds'] = entry['team2_wins']
 			return result
-		data = load_existing_data()
-		transformed_data = list(map(transform, data.values()))
+		data = BetDataManager().export()
+		transformed_data = list(map(transform, data))
+#		data = load_existing_data()
+#		transformed_data = list(map(transform, data.values()))
 		j = json.dumps(transformed_data)
 		self.respond(j, content_type="application/json")
 
