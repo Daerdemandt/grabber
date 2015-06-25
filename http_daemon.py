@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
-from misc import update_data
+from server import run_server
+
+PORT = 8000
+
 from generic_daemon import GenericDaemon
+import sys
 
-import time, sys
-
-seconds_between_updates = 10
-
-class UpdaterDaemon(GenericDaemon):
+class HTTPDaemon(GenericDaemon):
 	'''
-	Updates bet data regularily
+	Runs HTTP server
 	'''
 	def run(self):
-		while True:
-			data = update_data()
-#			print('{} entries total'.format(len(data)))
-			time.sleep(seconds_between_updates)
+		run_server(PORT)
 
 if __name__ == "__main__":
-	daemon = UpdaterDaemon()
+	daemon = HTTPDaemon()
 	if len(sys.argv) == 2:
 		if 'start' == sys.argv[1]:
 			daemon.start()

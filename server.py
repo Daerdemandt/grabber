@@ -5,8 +5,6 @@ import socketserver
 from misc import load_existing_data
 import json
 
-PORT = 8001
-
 Handler = http.server.SimpleHTTPRequestHandler
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
@@ -50,7 +48,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 			result['entrant2_odds'] = entry['team2_wins']
 			return result
 		data = load_existing_data()
-		transformed_data = list(map(transform, data))
+		transformed_data = list(map(transform, data.values()))
 		j = json.dumps(transformed_data)
 		self.respond(j, content_type="application/json")
 
@@ -59,9 +57,6 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 			self.wfile.write(bytes(string, 'UTF-8'))
 		"""Respond to a GET request."""
 
-
-
-		
 
 		actions = {}
 		actions['/entrants'] = self.not_implemented
@@ -73,9 +68,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 		else:
 			self.not_found()
 
-	
-
-httpd = socketserver.TCPServer(("", PORT), MyHandler)
-
-print("serving at port", PORT)
-httpd.serve_forever()
+def run_server(port):
+	httpd = socketserver.TCPServer(("", port), MyHandler)
+	print("serving at port", port)
+	httpd.serve_forever()

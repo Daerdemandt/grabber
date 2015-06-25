@@ -27,12 +27,17 @@ def read_bet_parsers(parsers_dir):
 		parsers[name] = parser
 	return parsers
 
+from itertools import chain
+from functools import reduce
 def get_new_data(fields=None):
 	parsers = read_bet_parsers(bet_parsers_dir)
-	data = {}
+	data_by_parser = {}
 	for name in parsers:
 		parsers[name].do_static_cast()
-		data[name] = parsers[name].results
+		data_by_parser[name] = parsers[name].results
+	def unique_id(entry):
+		return '{}::{}'.format(entry['source'], entry['game_id'])
+	data = {unique_id(entry):entry for entry in reduce(chain, data_by_parser.values())}
 	return data
 
 from pickle import dump, load
@@ -73,7 +78,7 @@ def load_existing_data():
 	except FileNotFoundError:
 		with open(data_filename, 'a'):
 			pass # create the file if it does not exist
-		data = []
+		data = {}
 	return data
 
 def dump_existing_data(data):
@@ -84,10 +89,16 @@ def dump_existing_data(data):
 def update_data():
 # TODO: find way to avoid duplicates
 # TODO: find out why file_set doesn't work
+	print('Updating data:')
 	data = load_existing_data()
+	print('{} old entries loaded'.format(len(data)))
+#	print(data)
 	new_data = get_new_data()
-	for name in new_data:
-		data += list(new_data[name])
+	print('{} new entries fetched'.format(len(new_data)))
+	data.update(new_data)
+#	for name in new_data:
+#		data += list(new_data[name])
 	dump_existing_data(data)
+	print('{} entries total'.format(len(data)))
 	
 	return data
