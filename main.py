@@ -3,9 +3,11 @@ from http_daemon import HTTPDaemon
 from updater_daemon import UpdaterDaemon
 import time, sys, os
 
+PORT = 8000
+
 class App(object):
 	def __init__(self):
-		self.http = HTTPDaemon()
+		self.http = HTTPDaemon(PORT)
 		self.updater = UpdaterDaemon()
 	
 	def start(self):
