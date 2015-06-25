@@ -5,6 +5,7 @@ from generic_parser import GenericParser
 from datetime import timedelta, tzinfo # create UTC timezone - BP
 from inspect import getfile # to get instance's filename
 from os import path # to strip filename of unneeded stuff
+import re # poor man's name recognising
 
 class UTC(tzinfo):
 	"""UTC"""
@@ -38,4 +39,63 @@ class BetParser(GenericParser):
 	@staticmethod
 	def name_from_filename(filename):
 		return path.basename(filename).replace('.py', '')
+	
+	#TODO: it is a stub, reimplement properly		
+	@staticmethod
+	def recognize_discipline(gamename):
+		'''
+	Return normalized name of the game, provided with game name
+
+	Counter-Strike: Global Offensive -> CSGO
+	LoL -> LOL
+		'''
+		exp = {}
+	#	print(gamename)
+		exp['CSGO'] = re.compile('counter.?.?.?strike|CS', re.IGNORECASE)
+		exp['HOTS'] = re.compile('heroes.*storm|HOTS', re.IGNORECASE)
+		exp['SC2'] = re.compile('starcraft', re.IGNORECASE)
+		exp['DOTA2'] = re.compile('dota', re.IGNORECASE)
+		exp['HS'] = re.compile('hearthstone', re.IGNORECASE)
+		exp['LOL'] = re.compile('League.*Legends|LoL', re.IGNORECASE)
+		exp['WOT'] = re.compile('World.*Tanks|WOT', re.IGNORECASE)
+		for e in exp:
+			if exp[e].search(gamename):
+				return e
+		return "UNKNOWN_GAME"
+#TODO: implement this
+	@staticmethod
+	def split_with_discipline(string):
+		'''
+Return normalised name of discipline and remainder of the string
+
+'КиберСпорт. Dota 2. ESL One' -> ('КиберСпорт. ', 'Dota2', '. ESL One',)
+'Киберcпорт. Counter-Strike: Global Offensive - ESL ESEA Pro' -> ('Киберcпорт. ', 'CSGO', ' - ESL ESEA Pro',)
+'''
+		exp = {}
+#	print(gamename)
+		exp['CSGO'] = re.compile('counter.?.?.?strike|CS', re.IGNORECASE)
+		exp['HOTS'] = re.compile('heroes.*storm|HOTS', re.IGNORECASE)
+		exp['SC2'] = re.compile('starcraft', re.IGNORECASE)
+		exp['DOTA2'] = re.compile('dota', re.IGNORECASE)
+		exp['HS'] = re.compile('hearthstone', re.IGNORECASE)
+		exp['LOL'] = re.compile('League.*Legends|LoL', re.IGNORECASE)
+		exp['WOT'] = re.compile('World.*Tanks|WOT', re.IGNORECASE)
+		for e in exp:
+			m = exp[e].search(string)
+			if m:
+				head, tail = string.split(m.group(), maxsplit=1)
+				# We use maxsplit because of stuff like 'Киберспорт. Dota 2 - Dotapit League'
+				return head, e, tail
+		return ('NOT_IMPLEMENTED', "UNKNOWN_GAME", 'NOT_IMPLEMENTED',)
+
+#TODO: implement this
+	@staticmethod
+	def recognize_name(string):
+		'''
+Return normalised name of team / player
+'NatusVincere' -> 'NaVi'
+'Natus.Vinsere' -> 'NaVi'
+'Virtus-pro' -> 'VirtusPro'
+'''
+		return string
 # end of BetParser

@@ -54,30 +54,6 @@ class LeagueParser(BetParser):
 			yield bet_data
 		pass
 
-#TODO: it is a stub, reimplement properly		
-import re
-def recognize_game(gamename):
-	'''
-Return normalized name of the game, provided with game name
-
-Counter-Strike: Global Offensive -> CSGO
-LoL -> LOL
-	'''
-	exp = {}
-#	print(gamename)
-	exp['CSGO'] = re.compile('counter.?.?.?strike|CS', re.IGNORECASE)
-	exp['HOTS'] = re.compile('heroes.*storm|HOTS', re.IGNORECASE)
-	exp['SC2'] = re.compile('starcraft', re.IGNORECASE)
-	exp['DOTA2'] = re.compile('dota', re.IGNORECASE)
-	exp['HS'] = re.compile('hearthstone', re.IGNORECASE)
-	exp['LOL'] = re.compile('League.*Legends|LoL', re.IGNORECASE)
-	exp['WOT'] = re.compile('World.*Tanks|WOT', re.IGNORECASE)
-	for e in exp:
-		if exp[e].search(gamename):
-			return e
-	return "UNKNOWN_GAME"
-
-
 class Parser(BetParser):
 	def __init__(self):
 		BetParser.__init__(self, 'http://www.pin1111.com/en/esports/odds', 'html')
@@ -91,7 +67,7 @@ class Parser(BetParser):
 			league_ref = league['href']
 			league_id = league_ref.split('=')[1]
 			#TODO: reimplement, it's a stub
-			game_name = recognize_game(league.h2.string)
+			game_name = self.recognize_discipline(league.h2.string)
 			lp = LeagueParser(league_id)
 			for game_data in lp.get_data():
 				game_data['league_id'] = league_id
