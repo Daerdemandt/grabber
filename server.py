@@ -16,19 +16,25 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 		self.wfile.write(bytes(content, 'UTF-8'))
 		
 	def do_PUT(self):
-		print("----- SOMETHING WAS PUT!! ------")
-		print(self.headers)
-		length = int(self.headers['Content-Length'])
-		content = self.rfile.read(length)
-		self.send_response(200)
-		print(content)
+		if self.path == '/services':
+			self.not_implemented()
+			print("----- SOMETHING WAS PUT!! ------")
+			print(self.headers)
+			length = int(self.headers['Content-Length'])
+			content = self.rfile.read(length)
+			print(content)
+		else:
+			# TODO: switch to 405, provide proper Allow header
+			self.send_response(403)
+			
+
 
 	def not_implemented(self):
 		doc = []
 		doc += ["<html><head><title>Not implemented.</title></head>"]
 		doc += ["<body><p>{} is not implemented yet.</p>".format(self.path)]
 		doc += ["</body></html>"]
-		self.respond('\n'.join(doc))
+		self.respond('\n'.join(doc), code=501)
 
 	def not_found(self):
 		doc = []
