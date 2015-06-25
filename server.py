@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import http.server
 import socketserver
-from misc import BetDataManager
+from data_manager import BetDataManager
 import json
 
 Handler = http.server.SimpleHTTPRequestHandler

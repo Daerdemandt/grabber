@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from misc import BetDataManager
+from data_manager import BetDataManager
 from generic_daemon import GenericDaemon
 
 from config import seconds_between_updates
