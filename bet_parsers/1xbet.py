@@ -204,7 +204,8 @@ Return normalised name of discipline and remainder of the string
 		for e in exp:
 			m = exp[e].search(string)
 			if m:
-				head, tail = string.split(m.group())
+				head, tail = string.split(m.group(), maxsplit=1)
+				# We use maxsplin because of stuff like 'Киберспорт. Dota 2 - Dotapit League'
 				return head, e, tail
 		return ('NOT_IMPLEMENTED', "UNKNOWN_GAME", 'NOT_IMPLEMENTED',)
 
