@@ -18,6 +18,8 @@ from bet_parser import BetParser
 from pickle import dump, load
 from weakref import finalize
 
+import json
+
 class file_dict(dict):
 	'''
 	Dictionary that is initiated from a given file (if it exists) and
@@ -48,7 +50,22 @@ class BetDataManager(object):
 		with open(config.data_filename, 'rb') as cache_file:
 			data = load(cache_file)
 			return tuple(data.values())
-	
+
+	@staticmethod
+	def export_matches_in_json():
+		with open(config.data_filename, 'rb') as cache_file:
+			data = load(cache_file)
+		def export_entry(uniq_id):
+			entry = data[uniq_id]
+			result = {'id': uniq_id}
+			result['entrant1'] = entry['team1']
+			result['entrant2'] = entry['team2']
+			result['timestamp'] = entry['datetime'].timestamp()
+			result['entrant1_odds'] = entry['team1_wins']
+			result['entrant2_odds'] = entry['team2_wins']
+			return result
+		return json.dumps([export_entry(uniq_id) for uniq_id in data])
+
 	def update_data(self):
 		print('Updating data:')
 		if not hasattr(self, 'data'):

@@ -2,7 +2,6 @@
 import http.server
 import socketserver
 from data_manager import BetDataManager
-import json
 
 Handler = http.server.SimpleHTTPRequestHandler
 
@@ -43,21 +42,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 		self.respond('\n'.join(doc), code=404)
 	
 	def return_matches(self):
-		def transform(entry):
-			result = {}
-			result['id'] = '{}::{}'.format(entry['source'], entry['game_id'])
-			result['entrant1'] = entry['team1']
-			result['entrant2'] = entry['team2']
-			result['timestamp'] = entry['datetime'].timestamp()
-			result['entrant1_odds'] = entry['team1_wins']
-			result['entrant2_odds'] = entry['team2_wins']
-			return result
-		data = BetDataManager().export()
-		transformed_data = list(map(transform, data))
-#		data = load_existing_data()
-#		transformed_data = list(map(transform, data.values()))
-		j = json.dumps(transformed_data)
-		self.respond(j, content_type="application/json")
+		data_json = BetDataManager.export_matches_in_json()
+		self.respond(data_json, content_type="application/json")
 
 	def do_GET(self):
 		def wr(string):
