@@ -23,8 +23,7 @@ class App(object):
 		self.updater.restart()
 		self.http.restart()
 
-
-if __name__ == "__main__":
+def main():
 	app = App()
 	if len(sys.argv) == 2:
 		if 'start' == sys.argv[1]:
@@ -63,4 +62,7 @@ if __name__ == "__main__":
 	else:
 		print("usage: %s start|stop|restart" % sys.argv[0])
 		sys.exit(2)
+		
+if __name__ == "__main__":
+	main()
 
